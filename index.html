@@ -12,8 +12,13 @@
 <body>
   <main class="app" data-mode="performance">
     <div class="top-bar">
-      <h1>Improv Spark</h1>
-      <button id="mode-btn">⚙ Settings</button>
+      <button id="back-btn">&#8592;</button>
+      <h1 id="app-title">Improv Spark</h1>
+      <div class="top-bar-actions">
+        <button id="fav-open-btn">&#9733; Favorites</button>
+        <button id="mode-btn">⚙ Settings</button>
+        <button id="help-btn" title="Keyboard shortcuts">?</button>
+      </div>
     </div>
 
     <section class="setup-panel">
@@ -64,22 +69,44 @@
     <section class="perf-panel">
       <div class="output">
         <div id="word-prompt" hidden></div>
-        <div id="chords"></div>
-        <div class="key-row">
-          <span id="key-label"></span>
+        <div class="chords-row">
+          <div id="chords"></div>
           <button id="fav-btn" title="Save to favorites">&#9734;</button>
         </div>
+        <span id="key-label"></span>
       </div>
 
       <button id="generate-btn">Spark</button>
-      <p class="hint">or press spacebar</p>
+      <p class="hint">space to spark &nbsp;·&nbsp; ? for shortcuts</p>
 
-      <div id="favorites-panel" hidden>
-        <h2 class="fav-heading">Favorites</h2>
-        <ul id="favorites-list"></ul>
-      </div>
+    </section>
+
+    <section class="fav-panel">
+      <ul id="favorites-list"></ul>
+      <p id="fav-empty">No favorites yet — star a progression to save it.</p>
     </section>
   </main>
+
+  <div id="help-overlay" hidden>
+    <div id="help-card">
+      <div class="help-header">
+        <span>Keyboard Shortcuts</span>
+        <button id="help-close">&#215;</button>
+      </div>
+      <div class="help-grid">
+        <kbd>Space</kbd><span>Spark new progression</span>
+        <kbd>F</kbd><span>Toggle favorite</span>
+        <kbd>H</kbd><span>Toggle chord / roman numeral</span>
+        <kbd>W</kbd><span>Toggle word prompt</span>
+        <kbd>S</kbd><span>Open / close settings</span>
+        <kbd>V</kbd><span>Open / close favorites</span>
+        <kbd>Esc</kbd><span>Back to performance</span>
+        <kbd>1 2 3</kbd><span>Progression: simple / medium / complex</span>
+        <kbd>4 5 6</kbd><span>Chords: basic / extended / rich</span>
+        <kbd>?</kbd><span>Show / hide this help</span>
+      </div>
+    </div>
+  </div>
 
   <script src="data.js"></script>
   <script src="app.js"></script>

@@ -2,7 +2,7 @@ const state = {
   progressionComplexity: 'simple',
   chordComplexity: 'basic',
   wordPrompt: false,
-  lockedKey: 'random',
+  lockedKey: 'C',
   highlight: 'chord',
   mode: 'performance',
 };
@@ -40,20 +40,17 @@ function renderFavBtn() {
 }
 
 function renderFavoritesList() {
-  const panel = document.getElementById('favorites-panel');
   const list = document.getElementById('favorites-list');
+  const empty = document.getElementById('fav-empty');
   list.innerHTML = '';
-  if (favorites.length === 0) {
-    panel.hidden = true;
-    return;
-  }
-  panel.hidden = false;
+  empty.hidden = favorites.length > 0;
   favorites.forEach((fav, i) => {
     const li = document.createElement('li');
     li.className = 'fav-item';
     const label = document.createElement('span');
     label.className = 'fav-label';
-    label.textContent = `${fav.key}  ${fav.chords.map(c => c.name).join('  ')}`;
+    const tokens = state.highlight === 'roman' ? fav.degrees : fav.chords.map(c => c.name);
+    label.textContent = `${fav.key}  ${tokens.join('  ')}`;
     label.addEventListener('click', () => loadFavorite(fav));
     const remove = document.createElement('button');
     remove.className = 'fav-remove';
@@ -152,12 +149,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const app = document.querySelector('.app');
   const modeBtn = document.getElementById('mode-btn');
 
-  // Mode toggle
-  modeBtn.addEventListener('click', () => {
-    state.mode = state.mode === 'performance' ? 'setup' : 'performance';
-    app.dataset.mode = state.mode;
-    modeBtn.textContent = state.mode === 'performance' ? '⚙ Settings' : '← Done';
-  });
+  const favOpenBtn = document.getElementById('fav-open-btn');
+  const backBtn = document.getElementById('back-btn');
+  const appTitle = document.getElementById('app-title');
+
+  const titles = { performance: 'Improv Spark', setup: 'Settings', favorites: 'Favorites' };
+
+  function setMode(mode) {
+    state.mode = mode;
+    app.dataset.mode = mode;
+    appTitle.textContent = titles[mode];
+    if (mode === 'favorites') renderFavoritesList();
+  }
+
+  modeBtn.addEventListener('click', () => setMode('setup'));
+  favOpenBtn.addEventListener('click', () => setMode('favorites'));
+  backBtn.addEventListener('click', () => setMode('performance'));
 
   // Toggle buttons
   document.querySelectorAll('.toggle-btn').forEach(btn => {
@@ -168,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (group === 'highlight') {
         state.highlight = value;
         document.getElementById('chords').classList.toggle('show-roman', value === 'roman');
-        return;
       }
       if (group === 'word') {
         state.wordPrompt = value === 'on';
@@ -186,6 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     opt.textContent = k;
     keySelect.appendChild(opt);
   });
+  keySelect.value = state.lockedKey;
   keySelect.addEventListener('change', () => {
     state.lockedKey = keySelect.value;
   });
@@ -193,14 +200,82 @@ document.addEventListener('DOMContentLoaded', () => {
   // Generate button
   document.getElementById('generate-btn').addEventListener('click', generate);
 
-  // Favorite button
   document.getElementById('fav-btn').addEventListener('click', toggleFavorite);
 
-  // Spacebar
+  // Help overlay
+  const helpOverlay = document.getElementById('help-overlay');
+  function toggleHelp() {
+    helpOverlay.hidden = !helpOverlay.hidden;
+  }
+  document.getElementById('help-btn').addEventListener('click', toggleHelp);
+  document.getElementById('help-close').addEventListener('click', toggleHelp);
+  helpOverlay.addEventListener('click', e => {
+    if (e.target === helpOverlay) toggleHelp();
+  });
+
+  // Hotkeys
   document.addEventListener('keydown', e => {
-    if (e.code === 'Space' && e.target === document.body) {
-      e.preventDefault();
-      generate();
+    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    switch (e.code) {
+      case 'Space':
+        e.preventDefault();
+        if (state.mode !== 'performance') setMode('performance');
+        generate();
+        break;
+      case 'KeyF':
+        toggleFavorite();
+        break;
+      case 'KeyH': {
+        const next = state.highlight === 'chord' ? 'roman' : 'chord';
+        state.highlight = next;
+        document.getElementById('chords').classList.toggle('show-roman', next === 'roman');
+        setToggle('highlight', next);
+        break;
+      }
+      case 'KeyW':
+        state.wordPrompt = !state.wordPrompt;
+        setToggle('word', state.wordPrompt ? 'on' : 'off');
+        generate();
+        break;
+      case 'KeyS':
+        setMode(state.mode === 'setup' ? 'performance' : 'setup');
+        break;
+      case 'KeyV':
+        setMode(state.mode === 'favorites' ? 'performance' : 'favorites');
+        break;
+      case 'Escape':
+        if (!helpOverlay.hidden) { toggleHelp(); break; }
+        if (state.mode !== 'performance') setMode('performance');
+        break;
+      case 'Digit1':
+        state.progressionComplexity = 'simple';
+        setToggle('progression', 'simple');
+        break;
+      case 'Digit2':
+        state.progressionComplexity = 'medium';
+        setToggle('progression', 'medium');
+        break;
+      case 'Digit3':
+        state.progressionComplexity = 'complex';
+        setToggle('progression', 'complex');
+        break;
+      case 'Digit4':
+        state.chordComplexity = 'basic';
+        setToggle('chord', 'basic');
+        break;
+      case 'Digit5':
+        state.chordComplexity = 'extended';
+        setToggle('chord', 'extended');
+        break;
+      case 'Digit6':
+        state.chordComplexity = 'rich';
+        setToggle('chord', 'rich');
+        break;
+      case 'Slash':
+        if (e.shiftKey) { e.preventDefault(); toggleHelp(); }
+        break;
     }
   });
 
@@ -212,5 +287,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initial generation
   generate();
-  renderFavoritesList();
 });

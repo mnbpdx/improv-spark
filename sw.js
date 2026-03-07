@@ -1,4 +1,4 @@
-const CACHE = 'improv-spark-v1';
+const CACHE = 'improv-spark-v2';
 const ASSETS = ['/', '/index.html', '/style.css', '/app.js', '/data.js', '/icon.svg', '/manifest.json'];
 
 self.addEventListener('install', e => {
