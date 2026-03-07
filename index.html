@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Improv Spark</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1a1a2e">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app" data-mode="performance">
+    <div class="top-bar">
+      <h1>Improv Spark</h1>
+      <button id="mode-btn">⚙ Settings</button>
+    </div>
+
+    <section class="setup-panel">
+      <div class="controls">
+        <div class="control-row">
+          <span class="control-label">Progression</span>
+          <div class="toggle-group">
+            <button class="toggle-btn" data-group="progression" data-value="simple">Simple</button>
+            <button class="toggle-btn" data-group="progression" data-value="medium">Medium</button>
+            <button class="toggle-btn" data-group="progression" data-value="complex">Complex</button>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <span class="control-label">Chords</span>
+          <div class="toggle-group">
+            <button class="toggle-btn" data-group="chord" data-value="basic">Basic</button>
+            <button class="toggle-btn" data-group="chord" data-value="extended">Extended</button>
+            <button class="toggle-btn" data-group="chord" data-value="rich">Rich</button>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <span class="control-label">Key</span>
+          <select id="key-select" class="key-select">
+            <option value="random">Random</option>
+          </select>
+        </div>
+
+        <div class="control-row">
+          <span class="control-label">Show</span>
+          <div class="toggle-group">
+            <button class="toggle-btn" data-group="highlight" data-value="chord">Chord</button>
+            <button class="toggle-btn" data-group="highlight" data-value="roman">Roman</button>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <span class="control-label">Word</span>
+          <div class="toggle-group">
+            <button class="toggle-btn" data-group="word" data-value="off">Off</button>
+            <button class="toggle-btn" data-group="word" data-value="on">On</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="perf-panel">
+      <div class="output">
+        <div id="word-prompt" hidden></div>
+        <div id="chords"></div>
+        <div class="key-row">
+          <span id="key-label"></span>
+          <button id="fav-btn" title="Save to favorites">&#9734;</button>
+        </div>
+      </div>
+
+      <button id="generate-btn">Spark</button>
+      <p class="hint">or press spacebar</p>
+
+      <div id="favorites-panel" hidden>
+        <h2 class="fav-heading">Favorites</h2>
+        <ul id="favorites-list"></ul>
+      </div>
+    </section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+  </script>
+</body>
+</html>

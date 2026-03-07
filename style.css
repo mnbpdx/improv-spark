@@ -1,0 +1,352 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:        #0f0f14;
+  --surface:   #1a1a24;
+  --border:    #2e2e3e;
+  --text:      #e8e8f0;
+  --muted:     #7070a0;
+  --accent:    #7c6af5;
+  --accent-hi: #a99cf8;
+  --pill-bg:   #22223a;
+  --pill-border: #3a3a5a;
+
+  --func-tonic:    #4a7fa5;
+  --func-subdom:   #4a8c6a;
+  --func-dominant: #a07840;
+  --func-chromatic:#7a5080;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.app {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Mode switching */
+.app[data-mode="performance"] .setup-panel { display: none; }
+.app[data-mode="setup"]       .perf-panel  { display: none; }
+
+/* Top bar */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+h1 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+#mode-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  transition: color 0.15s;
+}
+
+#mode-btn:hover {
+  color: var(--text);
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.control-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  width: 5.5rem;
+  flex-shrink: 0;
+}
+
+.toggle-group {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.toggle-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: 0.03em;
+}
+
+.toggle-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.toggle-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Key select */
+.key-select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.key-select:focus, .key-select:hover {
+  border-color: var(--accent);
+}
+
+/* Output area */
+.output {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+#word-prompt {
+  font-style: italic;
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--accent-hi);
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+#chords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  justify-content: center;
+}
+
+.chord-pill {
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-border);
+  border-radius: 10px;
+  padding: 0.5rem 1.1rem 0.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  transition: border-color 0.15s;
+}
+
+.chord-pill:hover {
+  border-color: var(--accent);
+}
+
+.chord-pill.func-tonic    { border-color: var(--func-tonic); }
+.chord-pill.func-subdom   { border-color: var(--func-subdom); }
+.chord-pill.func-dominant { border-color: var(--func-dominant); }
+.chord-pill.func-chromatic{ border-color: var(--func-chromatic); }
+
+.chord-name {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.chord-degree {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Roman numeral emphasis mode */
+#chords.show-roman .chord-name {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 1;
+}
+
+#chords.show-roman .chord-degree {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  font-style: normal;
+  order: -1;
+}
+
+.key-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#key-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+#fav-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.15s, transform 0.1s;
+}
+
+#fav-btn:hover {
+  color: var(--text);
+}
+
+#fav-btn.fav-active {
+  color: #f0c040;
+}
+
+#fav-btn:active {
+  transform: scale(1.2);
+}
+
+/* Favorites panel */
+#favorites-panel {
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.fav-heading {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+
+#favorites-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.fav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.fav-label {
+  font-size: 0.85rem;
+  color: var(--text);
+  cursor: pointer;
+  flex: 1;
+  letter-spacing: 0.04em;
+}
+
+.fav-label:hover {
+  color: var(--accent-hi);
+}
+
+.fav-remove {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0 0 0 0.5rem;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.fav-remove:hover {
+  color: var(--text);
+}
+
+/* Generate button */
+#generate-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.85rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.15s, transform 0.1s;
+}
+
+#generate-btn:hover {
+  background: var(--accent-hi);
+}
+
+#generate-btn:active {
+  transform: scale(0.98);
+}
+
+.hint {
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
