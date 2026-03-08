@@ -290,8 +290,22 @@ h1 {
   transition: border-color 0.15s;
 }
 
+.chord-pill {
+  cursor: pointer;
+}
+
 .chord-pill:hover {
   border-color: var(--accent);
+}
+
+.chord-pill.playing {
+  animation: chord-pulse 0.6s ease-out;
+}
+
+@keyframes chord-pulse {
+  0%   { transform: scale(1);    box-shadow: 0 0 0 0   rgba(255,255,255,0.4); }
+  50%  { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(255,255,255,0);   }
+  100% { transform: scale(1);    box-shadow: none; }
 }
 
 .chord-pill.func-tonic    { border-color: var(--func-tonic); }

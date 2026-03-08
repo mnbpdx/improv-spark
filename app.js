@@ -5,6 +5,7 @@ const state = {
   lockedKey: 'C',
   highlight: 'chord',
   mode: 'performance',
+  audioTone: 'soft',
 };
 
 let currentGenerated = null;
@@ -81,7 +82,7 @@ function resolveChord(degree, keyRoot, chordComplexity) {
   const chromatic = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
   const rootIdx = chromatic.indexOf(keyRoot);
   const semitones = DEGREE_SEMITONE[degree];
-  if (semitones === undefined) return degree; // fallback
+  if (semitones === undefined) return { name: degree, rootIdx: 0, intervals: [0, 4, 7] }; // fallback
 
   const noteIdx = (rootIdx + semitones) % 12;
   const note = chromatic[noteIdx];
@@ -100,18 +101,104 @@ function resolveChord(degree, keyRoot, chordComplexity) {
     suffix = ''; // major triad as dominant stand-in
   }
 
-  return note + suffix;
+  return {
+    name: note + suffix,
+    rootIdx: noteIdx,
+    intervals: CHORD_INTERVALS[suffix] || [0, 4, 7],
+  };
+}
+
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new AudioContext();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playChordSoft(rootIdx, intervals) {
+  const ctx = getAudioCtx();
+  const baseFreq = 130.81 * Math.pow(2, rootIdx / 12); // C3
+
+  intervals.forEach((interval, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = 'triangle';
+    osc.frequency.value = baseFreq * Math.pow(2, interval / 12);
+
+    const t = ctx.currentTime + i * 0.02;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.18 / intervals.length, t + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
+
+    osc.start(t);
+    osc.stop(t + 1.6);
+  });
+}
+
+function playChordPiano(rootIdx, intervals) {
+  const ctx = getAudioCtx();
+  const baseFreq = 261.63 * Math.pow(2, rootIdx / 12); // C4
+
+  // Real piano strings are slightly inharmonic — overtones stretch sharp
+  const B = 0.0003;
+  const harmonics = [1, 2, 3, 4];
+  const hGains    = [0.55, 0.18, 0.07, 0.025];
+
+  intervals.forEach((interval, i) => {
+    const noteFreq = baseFreq * Math.pow(2, interval / 12);
+    const t = ctx.currentTime + i * 0.022;
+
+    harmonics.forEach((n, hi) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.type = 'sine';
+      // Inharmonic stretch: fn = f1 · n · √(1 + B·n²)
+      osc.frequency.value = noteFreq * n * Math.sqrt(1 + B * n * n);
+
+      const peak    = hGains[hi] / intervals.length;
+      const sustain = peak * 0.28;
+      const tail    = t + 2.2 - hi * 0.4; // overtones die faster
+
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(peak, t + 0.010);    // soft hammer
+      gain.gain.exponentialRampToValueAtTime(sustain, t + 0.09); // initial drop
+      gain.gain.exponentialRampToValueAtTime(0.001, tail);   // slow tail
+
+      osc.start(t);
+      osc.stop(tail + 0.05);
+    });
+  });
+}
+
+function playChord(rootIdx, intervals) {
+  if (isNaN(rootIdx) || !intervals || !intervals.length) return;
+  if (state.audioTone === 'piano') playChordPiano(rootIdx, intervals);
+  else playChordSoft(rootIdx, intervals);
 }
 
 function renderProgression(key, chords) {
   document.getElementById('key-label').textContent = `KEY OF ${key}`;
   const chordsEl = document.getElementById('chords');
   chordsEl.innerHTML = '';
-  chords.forEach(({ name, degree }) => {
+  chords.forEach(({ name, degree, rootIdx, intervals }) => {
     const span = document.createElement('span');
     const funcClass = DEGREE_FUNCTION[degree] ? ` func-${DEGREE_FUNCTION[degree]}` : '';
     span.className = `chord-pill${funcClass}`;
+    span.dataset.root = rootIdx;
+    span.dataset.intervals = (intervals || [0, 4, 7]).join(',');
     span.innerHTML = `<span class="chord-name">${name}</span><span class="chord-degree">${degree}</span>`;
+    span.addEventListener('click', () => {
+      playChord(parseInt(span.dataset.root), span.dataset.intervals.split(',').map(Number));
+      span.classList.add('playing');
+      setTimeout(() => span.classList.remove('playing'), 600);
+    });
     chordsEl.appendChild(span);
   });
   chordsEl.classList.toggle('chords-compact', chords.length > 6);
@@ -122,7 +209,7 @@ function generate() {
   const key = state.lockedKey === 'random' ? rand(KEYS) : state.lockedKey;
   const degrees = rand(PROGRESSIONS[state.progressionComplexity]);
   const chords = degrees.map(deg => ({
-    name: resolveChord(deg, key, state.chordComplexity),
+    ...resolveChord(deg, key, state.chordComplexity),
     degree: deg,
   }));
 
@@ -181,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.wordPrompt = value === 'on';
         generate();
       }
+      if (group === 'tone') state.audioTone = value;
       setToggle(group, value);
     });
   });
@@ -285,6 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setToggle('chord', state.chordComplexity);
   setToggle('highlight', state.highlight);
   setToggle('word', 'off');
+  setToggle('tone', state.audioTone);
 
   // Initial generation
   generate();
