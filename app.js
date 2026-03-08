@@ -71,6 +71,7 @@ function renderFavoritesList() {
 function loadFavorite(fav) {
   currentGenerated = fav;
   renderProgression(fav.key, fav.chords);
+  document.getElementById('piano').hidden = true;
   renderFavBtn();
 }
 
@@ -183,6 +184,68 @@ function playChord(rootIdx, intervals) {
   else playChordSoft(rootIdx, intervals);
 }
 
+// Piano: semitone -> white-key index (0-6), null = black key
+const WHITE_KEY_SEMITONES = [0, 2, 4, 5, 7, 9, 11];
+// Black keys: [semitone, left-offset as fraction of total width]
+// Left = (whiteKeyIndex * (1/7)) - (blackWidth/2), blackWidth = 0.58/7
+const BLACK_KEYS = [
+  { semitone: 1,  whiteAfter: 1 },
+  { semitone: 3,  whiteAfter: 2 },
+  { semitone: 6,  whiteAfter: 4 },
+  { semitone: 8,  whiteAfter: 5 },
+  { semitone: 10, whiteAfter: 6 },
+];
+
+function buildPiano() {
+  const container = document.getElementById('piano');
+  const kb = document.createElement('div');
+  kb.className = 'piano-keyboard';
+
+  WHITE_KEY_SEMITONES.forEach(s => {
+    const k = document.createElement('div');
+    k.className = 'piano-key white';
+    k.dataset.semitone = s;
+    kb.appendChild(k);
+  });
+
+  BLACK_KEYS.forEach(({ semitone, whiteAfter }) => {
+    const k = document.createElement('div');
+    k.className = 'piano-key black';
+    k.dataset.semitone = semitone;
+    // left = whiteAfter/7 * 100% - half black key width
+    // black key width = 0.58/7 * 100%, half = 0.29/7 * 100%
+    const leftPct = (whiteAfter / 7 - 0.29 / 7) * 100;
+    k.style.left = leftPct.toFixed(3) + '%';
+    kb.appendChild(k);
+  });
+
+  container.appendChild(kb);
+}
+
+function highlightPianoNotes(rootIdx, intervals, anchorEl) {
+  const activeKeys = new Set(intervals.map(i => (rootIdx + i) % 12));
+  const piano = document.getElementById('piano');
+  document.querySelectorAll('.piano-key').forEach(key => {
+    key.classList.toggle('active', activeKeys.has(parseInt(key.dataset.semitone)));
+  });
+
+  if (anchorEl) {
+    const rect = anchorEl.getBoundingClientRect();
+    const pianoW = 160;
+    const pianoH = 44;
+    const gap = 16;
+    let left = rect.left + rect.width / 2 - pianoW / 2;
+    let top = rect.top - pianoH - gap;
+    // clamp to viewport
+    left = Math.max(8, Math.min(left, window.innerWidth - pianoW - 8));
+    top = Math.max(8, top);
+    piano.style.left = left + 'px';
+    piano.style.top = top + 'px';
+  }
+
+  piano.hidden = false;
+}
+
 function renderProgression(key, chords) {
   document.getElementById('key-label').textContent = `KEY OF ${key}`;
   const chordsEl = document.getElementById('chords');
@@ -195,7 +258,11 @@ function renderProgression(key, chords) {
     span.dataset.intervals = (intervals || [0, 4, 7]).join(',');
     span.innerHTML = `<span class="chord-name">${name}</span><span class="chord-degree">${degree}</span>`;
     span.addEventListener('click', () => {
-      playChord(parseInt(span.dataset.root), span.dataset.intervals.split(',').map(Number));
+      const root = parseInt(span.dataset.root);
+      const ivs = span.dataset.intervals.split(',').map(Number);
+      playChord(root, ivs);
+      span.classList.remove('playing');
+      highlightPianoNotes(root, ivs, span);
       span.classList.add('playing');
       setTimeout(() => span.classList.remove('playing'), 600);
     });
@@ -215,6 +282,7 @@ function generate() {
 
   currentGenerated = { key, degrees, chords };
   renderProgression(key, chords);
+  document.getElementById('piano').hidden = true;
   renderFavBtn();
 
   // Word prompt
@@ -234,6 +302,7 @@ function setToggle(group, value) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  buildPiano();
   const app = document.querySelector('.app');
   const modeBtn = document.getElementById('mode-btn');
 
@@ -247,6 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.mode = mode;
     app.dataset.mode = mode;
     appTitle.textContent = titles[mode];
+    if (mode !== 'performance') document.getElementById('piano').hidden = true;
     if (mode === 'favorites') renderFavoritesList();
   }
 

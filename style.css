@@ -468,6 +468,54 @@ h1 {
   color: var(--text);
 }
 
+/* Piano keyboard */
+#piano {
+  position: fixed;
+  width: 160px;
+  height: 44px;
+  z-index: 20;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+}
+
+#piano[hidden] { display: none; }
+
+.piano-keyboard {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+.piano-key.white {
+  flex: 1;
+  background: #d0d0d8;
+  border: 1px solid #888;
+  border-radius: 0 0 4px 4px;
+  position: relative;
+  z-index: 1;
+  transition: background 0.1s;
+}
+
+.piano-key.white.active {
+  background: var(--accent);
+}
+
+.piano-key.black {
+  position: absolute;
+  top: 0;
+  width: calc(100% / 7 * 0.58);
+  height: 58%;
+  background: #1a1a1a;
+  border: 1px solid #000;
+  border-radius: 0 0 3px 3px;
+  z-index: 2;
+  transition: background 0.1s;
+}
+
+.piano-key.black.active {
+  background: var(--accent);
+}
+
 /* Generate button */
 #generate-btn {
   background: var(--accent);
