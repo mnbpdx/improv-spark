@@ -14,8 +14,12 @@ const PROGRESSIONS = {
     ['IV', 'V', 'I', 'vi'],
     ['I', 'IV', 'vi', 'V'],
     ['I', 'iii', 'IV', 'V'],
+    ['vi', 'IV', 'I', 'V'],
+    ['I', 'bVII', 'I'],
+    ['IV', 'V', 'vi', 'I'],
   ],
   medium: [
+    ['I', 'I', 'I', 'I', 'IV', 'IV', 'I', 'I', 'V', 'IV', 'I', 'I'],
     ['ii', 'V', 'I'],
     ['I', 'vi', 'ii', 'V'],
     ['I', 'IV', 'ii', 'V'],

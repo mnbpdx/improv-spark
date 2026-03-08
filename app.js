@@ -114,6 +114,7 @@ function renderProgression(key, chords) {
     span.innerHTML = `<span class="chord-name">${name}</span><span class="chord-degree">${degree}</span>`;
     chordsEl.appendChild(span);
   });
+  chordsEl.classList.toggle('chords-compact', chords.length > 6);
   if (state.highlight === 'roman') chordsEl.classList.add('show-roman');
 }
 

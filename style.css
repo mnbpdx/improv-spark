@@ -249,6 +249,35 @@ h1 {
   justify-content: center;
 }
 
+#chords.chords-compact {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+#chords.chords-compact .chord-pill {
+  padding: 0.3rem 0.5rem 0.25rem;
+  border-radius: 8px;
+}
+
+#chords.chords-compact .chord-name {
+  font-size: 1.1rem;
+}
+
+#chords.chords-compact .chord-degree {
+  font-size: 0.6rem;
+}
+
+#chords.chords-compact.show-roman .chord-degree {
+  font-size: 1.1rem;
+}
+
+#chords.chords-compact.show-roman .chord-name {
+  font-size: 0.6rem;
+}
+
 .chord-pill {
   background: var(--pill-bg);
   border: 1px solid var(--pill-border);
